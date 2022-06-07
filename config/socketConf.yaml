@@ -1,0 +1,45 @@
+ethereum:
+    synth_burning:
+        contractName: 'SynthetixBridgeToOptimism'
+        abi: 'SynthetixBridgeToOptimism'
+        topic: 'InitiateSynthTransfer(bytes32,address,uint256)'
+        discordHook: 'https://discord.com/api/webhooks/983084735515467856/A0FFO1iZ5e5vn4tGYOtTYh_3NczwYdzojSmafukVZe_SDRnrt7R1LHgTfuXLSOPre_zZ'
+    synth_minting: 
+        contractName:  'SynthetixBridgeToOptimism'
+        abi:  'SynthetixBridgeToOptimism'
+        topic: 'FinalizeSynthTransfer(bytes32,address,uint256)'
+        discordHook: 'https://discord.com/api/webhooks/983084794634194984/yhLR8FjSue88iU29d8KBVVtIPAuiLcwF9TAsYmX_9rToODoMsfaZiKxVUEgPlnr7MNLe'
+    synth_exchange:
+        contractName: 'ProxyERC20'
+        abi: 'Synthetix'
+        topic: 'SynthExchange(address,bytes32,uint256,bytes32,uint256,address)'
+        discordHook:
+            big: 'https://discord.com/api/webhooks/983095610330742794/N8VpPLxb9lVVa07lsucPOp9PHz25D3IVCVyVMkobEDW7-DsDZ9OjxKX8zOAEekhDfw8R'
+            small: 'https://discord.com/api/webhooks/983095665343201280/XKUauOIyTvMzMgLAAhbVLuH-tJtyj0xYHzZ1PqEZVA1Q0yGai3j-e7Kv1yqC12MYnmGQ'
+optimism:
+    synth_burning:
+        contractName: 'SynthetixBridgeToBase'
+        topic: 'InitiateSynthTransfer(bytes32,address,uint256)'
+        discordHook: 'https://discord.com/api/webhooks/983084735515467856/A0FFO1iZ5e5vn4tGYOtTYh_3NczwYdzojSmafukVZe_SDRnrt7R1LHgTfuXLSOPre_zZ'
+        abi: 'SynthetixBridgeToBase'
+
+    synth_minting:
+        contractName: 'SynthetixBridgeToBase'
+        topic: 'FinalizeSynthTransfer(bytes32,address,uint256)'
+        discordHook: 'https://discord.com/api/webhooks/983084794634194984/yhLR8FjSue88iU29d8KBVVtIPAuiLcwF9TAsYmX_9rToODoMsfaZiKxVUEgPlnr7MNLe'
+        abi: 'SynthetixBridgeToBase'
+
+    synth_exchange:
+        contractName: 'ProxyERC20'
+        topic: 'SynthExchange(address,bytes32,uint256,bytes32,uint256,address)'
+        abi: 'Synthetix'
+        discordHook:
+            big: 'https://discord.com/api/webhooks/983095610330742794/N8VpPLxb9lVVa07lsucPOp9PHz25D3IVCVyVMkobEDW7-DsDZ9OjxKX8zOAEekhDfw8R'
+            small: 'https://discord.com/api/webhooks/983095665343201280/XKUauOIyTvMzMgLAAhbVLuH-tJtyj0xYHzZ1PqEZVA1Q0yGai3j-e7Kv1yqC12MYnmGQ'
+    futures_position_modified_eth:
+        contractName: 'FuturesMarketETH'
+        abi: 'FuturesMarketETH'
+        topic: 'PositionModified(uint256,address,uint256,int256,int256,uint256,uint256,uint256)'
+        discordHook:
+            big: 'https://discord.com/api/webhooks/956503951128293426/QFz3SOXULNRwJCdfxtuDr0LvpK-ooPIFiCn_MTtgAR-aQ_vnl6NoP0KZ4WEeaq15vKQR'
+            small: 'https://discord.com/api/webhooks/956504059936899082/RCVLtpCOwb9NS2h9TKeGAkQzqqKXMoxlpjajkUi9ZiavpytOloc_DVf8u1kZ-8B0X80B'
