@@ -5,4 +5,4 @@ COPY . .
 
 RUN pip install -r env/requirements.txt
 
-CMD ["python","main.py","-t","prod"]
+CMD ["python3","main.py","-t","prod"]

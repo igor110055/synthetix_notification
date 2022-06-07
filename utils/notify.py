@@ -33,6 +33,7 @@ class Notify():
         #On cancellation, cancel subscription
         except KeyboardInterrupt:
             self.notifierActive = False
+            sys.exit(0)
             
         except asyncio.CancelledError:
             self.log(message="notify disconnection on task cancellation",isWarning=False)

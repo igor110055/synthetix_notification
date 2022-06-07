@@ -25,7 +25,7 @@ class Websocket():
                     
             #On cancellation, cancel subscription
             except KeyboardInterrupt:
-                pass
+                sys.exit(0)
                 
             except asyncio.CancelledError:
                 self.log(message="socket disconnection on cancellation",isWarning=False)                
@@ -59,6 +59,7 @@ class Websocket():
             except KeyboardInterrupt:
                 self.log(message="generator successfully killed",isWarning=False)
                 self.socketGenerator = False
+                sys.exit(0)
             except:
                 self.logger.exception('issue see with socket generator, restarting bot')
                 sys.exit(2)
@@ -90,6 +91,7 @@ class Websocket():
         except KeyboardInterrupt:
             self.healIsActive= False
             print("self-heal killed successfully!")
+            sys.exit(0)
         except:
             self.logger.exception('issue with socket heal, restarting bot')
             sys.exit(2)
