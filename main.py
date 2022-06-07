@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from utils.utility import parse_config
 from utils.controller import Controller
 import argparse
