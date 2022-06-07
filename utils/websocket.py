@@ -29,6 +29,7 @@ class Websocket():
                 
             except asyncio.CancelledError:
                 self.log(message="socket disconnection on cancellation",isWarning=False)                
+                sys.exit(0)
 
             #On Inordinary exception regenerate the socket
             except:    
@@ -55,6 +56,7 @@ class Websocket():
             except asyncio.CancelledError:
                 self.log(message="generator killed",isWarning=False)
                 self.taskGeneratorIsActive = False
+                sys.exit(0)
 
             except KeyboardInterrupt:
                 self.log(message="generator successfully killed",isWarning=False)
@@ -88,6 +90,8 @@ class Websocket():
         except asyncio.CancelledError:
             print("self-heal killed successfully!")
             self.healIsActive = False    
+            sys.exit(0)
+            
         except KeyboardInterrupt:
             self.healIsActive= False
             print("self-heal killed successfully!")
