@@ -78,7 +78,12 @@ class Notify():
         etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
         for log in self.socketDict["output"]:
             outputDict = self.process_log(log)
-            usd_value = self.synthPriceDict.get(outputDict["fromCurrencyKey"],0)*outputDict["fromAmount"]
+            if outputDict["fromCurrencyKey"] == 'sUSD':
+                usd_value = outputDict["fromAmount"]
+            elif outputDict["toCurrencyKey"] == 'sUSD':
+                usd_value = outputDict["toAmount"]
+            else:                    
+                usd_value = self.synthPriceDict.get(outputDict["fromCurrencyKey"],0)*outputDict["fromAmount"]
             df = pd.DataFrame.from_dict({'from': [str("{0:,.2f}".format(outputDict["fromAmount"])) + " " + outputDict["fromCurrencyKey"]],
                                          'to': [str("{0:,.2f}".format(outputDict["toAmount"])) +" " + outputDict["toCurrencyKey"]],
                                          'user': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})'''],
