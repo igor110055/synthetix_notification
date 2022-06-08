@@ -89,18 +89,10 @@ class Notify():
             df.columns=[f'''{int(log["blockNumber"],16)}''',"synth_trade"]
             df = df[df.columns[::-1]]
             hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
-            if outputDict["fromCurrencyKey"] == 'sUSD':
-                if outputDict["fromAmount"] > 10000:
-                    hook = hook["big"]
-                else:
-                    hook = hook["small"]
-            elif outputDict["toCurrencyKey"] == 'sUSD':
-                if outputDict["toAmount"] > 10000:
-                    hook = hook["big"]
-                else:
-                    hook = hook["small"]
-            else:
+            if usd_value>10000:
                 hook = hook["big"]
+            else:
+                hook = hook["small"]
             self.print_embed(hook=hook, df=df)
                         
     def process_futures_position_modified(self):
