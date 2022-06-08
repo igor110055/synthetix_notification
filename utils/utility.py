@@ -21,7 +21,7 @@ def get_abi(conf,address,network):
     while True:
         try:
             result = requests.get(url,headers=headers).json()
-            if result["status"] != 0:
+            if result["status"] != '0':
                 return result["result"]
             else:
                 print("error seen with abi fetch, trying again")
