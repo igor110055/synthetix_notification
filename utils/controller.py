@@ -95,7 +95,6 @@ class Controller(Websocket,SnxContracts,Notify,Recurrent):
         params        = ["logs", {"topics": [Web3.keccak(text=topic).hex()],
                                   'address':address}]
         return baseProvider.encode_rpc_request(method='eth_subscribe', params=params) 
-
 #%%
 if __name__ =='__main__':
     self=Controller(conf,socketConf)

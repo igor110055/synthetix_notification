@@ -108,26 +108,27 @@ class Notify():
         ticker        = self.socketDict["eventId"].split("_")[-1]
         for log in self.socketDict["output"]:
             outputDict = self.process_log(log)
-            df = pd.DataFrame.from_dict({'margin': [str("{0:,.2f}".format(outputDict["margin"]))],
-                                         'size': [str("{0:,.2f}".format(outputDict["size"]))],
-                                         'tradeSize': [str("{0:,.2f}".format(outputDict["tradeSize"]))],
-                                         'lastPrice': [str("{0:,.2f}".format(outputDict["lastPrice"]))],
-                                         'fee': [str("{0:,.2f}".format(outputDict["fee"]))],
-                                         'trader': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
-            df["futures trade"] = df.index
-            tradeDirection = 'long' if outputDict["tradeSize"]>0 else 'short'
-            df.columns=[f'''{tradeDirection}  {ticker}''',"futures trade"]            
-            df = df[df.columns[::-1]]
-            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
-            if outputDict["tradeSize"]*outputDict["lastPrice"] > 10000:
-                hook = hook["big"]
-            else:
-                hook = hook["small"]
-            self.print_embed(hook=hook, df=df)
+            if outputDict["tradeSize"] != 0:
+                df = pd.DataFrame.from_dict({'margin': [str("{0:,.2f}".format(outputDict["margin"]))],
+                                             'size': [str("{0:,.2f}".format(outputDict["size"]))],
+                                             'tradeSize': [str("{0:,.2f}".format(outputDict["tradeSize"]))],
+                                             'tradeSizeUSD': [str("{0:,.2f}".format(outputDict["tradeSize"]*outputDict["lastPrice"]))],                       
+                                             'lastPrice': [str("{0:,.2f}".format(outputDict["lastPrice"]))],
+                                             'fee': [str("{0:,.2f}".format(outputDict["fee"]))],
+                                             'trader': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+                df["futures trade"] = df.index
+                tradeDirection = 'long' if outputDict["tradeSize"]>0 else 'short'
+                df.columns=[f'''{tradeDirection}  {ticker}''',"futures trade"]            
+                df = df[df.columns[::-1]]
+                hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+                if outputDict["tradeSize"]*outputDict["lastPrice"] > 10000:
+                    hook = hook["big"]
+                else:
+                    hook = hook["small"]
+                self.print_embed(hook=hook, df=df)
     
     def process_log(self,log):
-        decodedLog = decode_log(log=log, 
-                                topic_map=self.socketDict["topicMap"])        
+        decodedLog = decode_log(log=log, topic_map=self.socketDict["topicMap"]) 
         df = pd.DataFrame(decodedLog["data"])
         df["data"] = df[["type","value"]].apply(process_data,axis=1)
         df.index=df["name"]
@@ -139,7 +140,6 @@ class Notify():
         webhook     = Webhook.from_url(hook, adapter=RequestsWebhookAdapter())    
         columns     = df.columns
         valuesList  = df.values.tolist()
-                
         e = Embed()
         for idx, columnName in enumerate(columns):
             string = ''

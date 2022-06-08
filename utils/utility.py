@@ -20,14 +20,12 @@ def get_abi(conf,address,network):
     url = conf["etherscan"]["abi"][network].format(address)
     while True:
         try:
-            time.sleep(3)
             return requests.get(url,headers=headers).json()["result"]
         except :
             print("error seen with abi fetch, trying again")
             time.sleep(3)
 
 def process_data(data):
-    print(data)
     dtype,value = data
     if dtype =='bytes32':
         return Web3.toText(value).replace("\x00",'')
