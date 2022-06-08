@@ -37,6 +37,7 @@ class Notify():
             
         except asyncio.CancelledError:
             self.log(message="notify disconnection on task cancellation",isWarning=False)
+            sys.exit(0)
 
         #On Inordinary exception regenerate the socket
         except:
@@ -51,7 +52,7 @@ class Notify():
                                          'sent from': [('0x'+log["topics"][2][-40:])[:8]],
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [outputDict["currencyKey"]],
-                                         'amount': [str(outputDict["amount"])],
+                                         'amount': [str("{0:,.2f}".outputDict["amount"])],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
             df["synth minting"] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',"synth minting"]
@@ -67,7 +68,7 @@ class Notify():
                                          'sent from': [('0x'+log["topics"][2][-40:])[:8]],
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [outputDict["currencyKey"]],
-                                         'amount': [str(outputDict["amount"])],
+                                         'amount': [str("{0:,.2f}".outputDict["amount"])],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
             df["synth minting"] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',"synth burning"]
@@ -79,9 +80,11 @@ class Notify():
         etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
         for log in self.socketDict["output"]:
             outputDict = self.process_log(log)
-            df = pd.DataFrame.from_dict({'from': [str(outputDict["fromAmount"]) + " " + outputDict["fromCurrencyKey"]],
-                                         'to': [str(outputDict["toAmount"]) +" " + outputDict["toCurrencyKey"]],
-                                         'user': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            usd_value = self.synthPriceDict.get(outputDict["fromCurrencyKey"],0)*outputDict["fromAmount"]
+            df = pd.DataFrame.from_dict({'from': [str("{0:,.2f}".format(outputDict["fromAmount"])) + " " + outputDict["fromCurrencyKey"]],
+                                         'to': [str("{0:,.2f}".format(outputDict["toAmount"])) +" " + outputDict["toCurrencyKey"]],
+                                         'user': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})'''],
+                                         'trade value': "{0:,.2f} sUSD ".format(usd_value)}).T
             df["synth trade"] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',"synth_trade"]
             df = df[df.columns[::-1]]
@@ -105,11 +108,11 @@ class Notify():
         ticker        = self.socketDict["eventId"].split("_")[-1]
         for log in self.socketDict["output"]:
             outputDict = self.process_log(log)
-            df = pd.DataFrame.from_dict({'margin': [str(outputDict["margin"])],
-                                         'size': [str(outputDict["size"])],
-                                         'tradeSize': [str(outputDict["tradeSize"])],
-                                         'lastPrice': [str(outputDict["lastPrice"])],
-                                         'fee': [str(outputDict["fee"])],
+            df = pd.DataFrame.from_dict({'margin': [str("{0:,.2f}".format(outputDict["margin"]))],
+                                         'size': [str("{0:,.2f}".format(outputDict["size"]))],
+                                         'tradeSize': [str("{0:,.2f}".format(outputDict["tradeSize"]))],
+                                         'lastPrice': [str("{0:,.2f}".format(outputDict["lastPrice"]))],
+                                         'fee': [str("{0:,.2f}".format(outputDict["fee"]))],
                                          'trader': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
             df["futures trade"] = df.index
             tradeDirection = 'long' if outputDict["tradeSize"]>0 else 'short'

@@ -1,5 +1,6 @@
 from utils.websocket import Websocket
 from utils.snx_contracts import SnxContracts
+from utils.recurrent_tasks import Recurrent
 from utils.notify import Notify
 from web3.providers.base import JSONBaseProvider
 from utils.utility import get_abi
@@ -11,7 +12,7 @@ import asyncio
 import nest_asyncio
 nest_asyncio.apply()
 
-class Controller(Websocket,SnxContracts,Notify):
+class Controller(Websocket,SnxContracts,Notify,Recurrent):
 
     def __init__(self,conf,socketConf):
         
@@ -38,6 +39,10 @@ class Controller(Websocket,SnxContracts,Notify):
         master.append(self.heal_check())
         master.append(self.socket_generator())
         
+        #add recurrent tasks / fetching snx contracts / fetching synth prices
+        master.append(self.update_snx_contracts_async())
+        master.append(self.get_synth_prices_recurrent())
+                
         #add notification bot
         master.append(self.process_notifications())
                 
