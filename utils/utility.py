@@ -17,9 +17,10 @@ def get_w3(conf,network):
 
 def get_abi(conf,address,network):
     headers      = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-    url = conf["etherscan"]["abi"][network].format(address)    
+    url = conf["etherscan"]["abi"][network].format(address)
     while True:
         try:
+            time.sleep(3)
             return requests.get(url,headers=headers).json()["result"]
         except :
             print("error seen with abi fetch, trying again")
