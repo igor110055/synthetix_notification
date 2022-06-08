@@ -20,8 +20,9 @@ def get_abi(conf,address,network):
     url = conf["etherscan"]["abi"][network].format(address)
     while True:
         try:
-            return requests.get(url,headers=headers).json()["result"]
-        except :
+            result = requests.get(url,headers=headers).json()
+            return result["result"]
+        except:
             print("error seen with abi fetch, trying again")
             time.sleep(3)
 
