@@ -23,8 +23,8 @@ class Recurrent():
             synthDF["price"]        = synthDF["cap"] / synthDF["supply"]
             synthDF.index           = synthDF["currencyKey"]
             synthDF                 = synthDF["price"]
-            synthDict = {**synthPriceDict, **synthDF.to_dict()}        
-        self.synthPriceDict = synthDict
+            synthPriceDict = {**synthPriceDict, **synthDF.to_dict()}        
+        self.synthPriceDict = synthPriceDict
     
     async def get_synth_prices_recurrent(self):
         try:
