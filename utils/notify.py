@@ -116,7 +116,7 @@ class Notify():
                 df.columns=[f'''{tradeDirection}  {ticker}''',"futures trade"]            
                 df = df[df.columns[::-1]]
                 hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
-                if outputDict["tradeSize"]*outputDict["lastPrice"] > 10000:
+                if abs(outputDict["tradeSize"]*outputDict["lastPrice"]) > 10000:
                     hook = hook["big"]
                 else:
                     hook = hook["small"]
