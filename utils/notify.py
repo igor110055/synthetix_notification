@@ -49,7 +49,6 @@ class Notify():
         for log in self.socketDict["output"]:
             outputDict = self.process_log(log)
             df = pd.DataFrame.from_dict({'sent to': [outputDict["destination"][:8]],
-                                         'sent from': [('0x'+log["topics"][2][-40:])[:8]],
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [outputDict["currencyKey"]],
                                          'amount': ["{0:,.2f}".format(outputDict["amount"])],
@@ -65,7 +64,6 @@ class Notify():
         for log in self.socketDict["output"]:
             outputDict = self.process_log(log)
             df = pd.DataFrame.from_dict({'sent to': [outputDict["destination"][:8]],
-                                         'sent from': [('0x'+log["topics"][2][-40:])[:8]],
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [outputDict["currencyKey"]],
                                          'amount': ["{0:,.2f}".format(outputDict["amount"])],
