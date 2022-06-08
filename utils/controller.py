@@ -21,7 +21,7 @@ class Controller(Websocket,SnxContracts,Notify,Recurrent):
         Websocket.__init__(self)
         SnxContracts.__init__(self,conf=conf)
         Notify.__init__(self,conf)
-        Recurrent.__ini__(self,conf)
+        Recurrent.__init__(self,conf)
         
     def trigger_controller(self):
                 
