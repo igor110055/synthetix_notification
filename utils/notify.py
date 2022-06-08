@@ -52,7 +52,7 @@ class Notify():
                                          'sent from': [('0x'+log["topics"][2][-40:])[:8]],
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [outputDict["currencyKey"]],
-                                         'amount': [str("{0:,.2f}".outputDict["amount"])],
+                                         'amount': ["{0:,.2f}".format(outputDict["amount"])],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
             df["synth minting"] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',"synth minting"]
@@ -68,7 +68,7 @@ class Notify():
                                          'sent from': [('0x'+log["topics"][2][-40:])[:8]],
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [outputDict["currencyKey"]],
-                                         'amount': [str("{0:,.2f}".outputDict["amount"])],
+                                         'amount': ["{0:,.2f}".format(outputDict["amount"])],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
             df["synth minting"] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',"synth burning"]
