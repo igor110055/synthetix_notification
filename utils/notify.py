@@ -44,17 +44,82 @@ class Notify():
             self.logger.exception('issue with notification')
             sys.exit(1)
             
+    def process_shorts_open(self):
+        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
+        for log in self.socketDict["output"]:
+            outputDict, undecodedDict = self.process_log(log)
+            usdValue = self.synthPriceDict.get(outputDict["currency"],0)*outputDict["amount"]
+            df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
+                                         'sent on': [self.socketDict["network"]],
+                                         'ccy': [outputDict["currency"]],
+                                         'amount': ["{0:,.2f}".format(outputDict["amount"])],
+                                         'usdValue':[usdValue],
+                                         'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
+            df = df[df.columns[::-1]]
+            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+            if usdValue > 10000:
+                hook = hook["big"]    
+            else:
+                hook = hook["small"]
+            self.print_embed(hook=hook, df=df)
+
+    def process_shorts_increase(self):
+        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
+        for log in self.socketDict["output"]:
+            outputDict, undecodedDict = self.process_log(log)
+            shortCurrency = self.get_short_currency(undecodedDict["id"],self.socketDict["network"])
+            usdValue = self.synthPriceDict.get(shortCurrency,0)*outputDict["amount"]
+            df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
+                                         'sent on': [self.socketDict["network"]],
+                                         'ccy': [shortCurrency],
+                                         'amount': ["{0:,.2f}".format(outputDict["amount"])],
+                                         'usdValue':[usdValue],
+                                         'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
+            df = df[df.columns[::-1]]
+            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+            if usdValue > 10000:
+                hook = hook["big"]    
+            else:
+                hook = hook["small"]
+            self.print_embed(hook=hook, df=df)
+
+    def process_shorts_decrease(self):
+        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]
+        for log in self.socketDict["output"]:
+            outputDict, undecodedDict = self.process_log(log)
+            shortCurrency = self.get_short_currency(undecodedDict["id"],self.socketDict["network"])
+            usdValue = self.synthPriceDict.get(shortCurrency,0)*outputDict["amountRepaid"]
+            df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
+                                         'sent on': [self.socketDict["network"]],
+                                         'ccy': [shortCurrency],
+                                         'amount': ["{0:,.2f}".format(outputDict["amountRepaid"])],
+                                         'usdValue':[usdValue],
+                                         'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
+            df = df[df.columns[::-1]]
+            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+            if usdValue > 10000:
+                hook = hook["big"]    
+            else:
+                hook = hook["small"]
+            self.print_embed(hook=hook, df=df)
+
     def process_synth_minting(self):
         etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
         for log in self.socketDict["output"]:
-            outputDict = self.process_log(log)
+            outputDict, undecodedDict = self.process_log(log)
             df = pd.DataFrame.from_dict({'sent to': [outputDict["destination"][:8]],
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [outputDict["currencyKey"]],
                                          'amount': ["{0:,.2f}".format(outputDict["amount"])],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
-            df["synth minting"] = df.index
-            df.columns=[f'''{int(log["blockNumber"],16)}''',"synth minting"]
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
             df = df[df.columns[::-1]]
             hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
             self.print_embed(hook=hook, df=df)
@@ -62,14 +127,14 @@ class Notify():
     def process_synth_burning(self):
         etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
         for log in self.socketDict["output"]:
-            outputDict = self.process_log(log)
+            outputDict, undecodedDict = self.process_log(log)
             df = pd.DataFrame.from_dict({'sent to': [outputDict["destination"][:8]],
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [outputDict["currencyKey"]],
                                          'amount': ["{0:,.2f}".format(outputDict["amount"])],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
-            df["synth minting"] = df.index
-            df.columns=[f'''{int(log["blockNumber"],16)}''',"synth burning"]
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
             df = df[df.columns[::-1]]
             hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
             self.print_embed(hook=hook, df=df)
@@ -77,22 +142,22 @@ class Notify():
     def process_synth_exchange(self):
         etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
         for log in self.socketDict["output"]:
-            outputDict = self.process_log(log)
+            outputDict, undecodedDict = self.process_log(log)
             if outputDict["fromCurrencyKey"] == 'sUSD':
-                usd_value = outputDict["fromAmount"]
+                usdValue = outputDict["fromAmount"]
             elif outputDict["toCurrencyKey"] == 'sUSD':
-                usd_value = outputDict["toAmount"]
+                usdValue = outputDict["toAmount"]
             else:                    
-                usd_value = self.synthPriceDict.get(outputDict["fromCurrencyKey"],0)*outputDict["fromAmount"]
+                usdValue = self.synthPriceDict.get(outputDict["fromCurrencyKey"],0)*outputDict["fromAmount"]
             df = pd.DataFrame.from_dict({'from': [str("{0:,.2f}".format(outputDict["fromAmount"])) + " " + outputDict["fromCurrencyKey"]],
                                          'to': [str("{0:,.2f}".format(outputDict["toAmount"])) +" " + outputDict["toCurrencyKey"]],
                                          'user': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})'''],
-                                         'trade value': "{0:,.2f} sUSD ".format(usd_value)}).T
-            df["synth trade"] = df.index
-            df.columns=[f'''{int(log["blockNumber"],16)}''',"synth_trade"]
+                                         'trade value': "{0:,.2f} sUSD ".format(usdValue)}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
             df = df[df.columns[::-1]]
             hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
-            if usd_value>10000:
+            if usdValue>10000:
                 hook = hook["big"]
             else:
                 hook = hook["small"]
@@ -102,7 +167,7 @@ class Notify():
         etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]
         ticker        = self.socketDict["eventId"].split("_")[-1]
         for log in self.socketDict["output"]:
-            outputDict = self.process_log(log)
+            outputDict, undecodedDict = self.process_log(log)
             if outputDict["tradeSize"] != 0:
                 df = pd.DataFrame.from_dict({'margin': [str("{0:,.2f}".format(outputDict["margin"]))],
                                              'size': [str("{0:,.2f}".format(outputDict["size"]))],
@@ -121,14 +186,15 @@ class Notify():
                 else:
                     hook = hook["small"]
                 self.print_embed(hook=hook, df=df)
-    
+            
     def process_log(self,log):
         decodedLog = decode_log(log=log, topic_map=self.socketDict["topicMap"]) 
         df = pd.DataFrame(decodedLog["data"])
         df["data"] = df[["type","value"]].apply(process_data,axis=1)
         df.index=df["name"]
-        df = df["data"]
-        return df.to_dict()
+        decoded   = df["data"]
+        undecoded = df["value"]
+        return decoded.to_dict(), undecoded.to_dict()
     
     def print_embed(self,hook,df,title=None):
         
@@ -139,7 +205,7 @@ class Notify():
         for idx, columnName in enumerate(columns):
             string = ''
             for value in valuesList:
-                string =  string +  "\n" + value[idx]
+                string =  string +  "\n" + str(value[idx])
             e.add_field(name=columnName, 
                         value=string,
                         inline=True)

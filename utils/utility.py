@@ -37,7 +37,7 @@ def process_data(data):
         return Web3.toText(value).replace("\x00",'')
     elif dtype =='address':
         return value
-    elif dtype == 'uint256' or dtype == 'int256':
+    elif dtype == 'uint256' or dtype == 'int256' and abs(value) > 1e6:        
         return round(value/1e18,4)
     else:
         return value

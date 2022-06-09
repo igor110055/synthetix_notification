@@ -11,8 +11,7 @@ class Recurrent():
     
     def get_synth_prices(self):
         synthPriceDict = dict()
-        for network in self.conf["nodes"].keys():
-            self.synthPriceDict = dict()
+        for network in self.conf["nodes"].keys():            
             w3                      = get_w3(self.conf,network)
             utilsContract           = self.get_snx_contract(contractName='SynthUtil',w3=w3,network=network)
             synthSupplyList         = utilsContract.functions.synthsTotalSupplies().call()
@@ -29,7 +28,7 @@ class Recurrent():
     async def get_synth_prices_recurrent(self):
         try:
             while True:
-                await asyncio.sleep(60*5)
+                await asyncio.sleep(60*60)
                 self.get_synth_prices()
         except KeyboardInterrupt:
             sys.exit(0)
