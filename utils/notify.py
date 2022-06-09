@@ -41,6 +41,7 @@ class Notify():
 
         #On Inordinary exception regenerate the socket
         except:
+            self.log(f"issue seen with {self.socketDict}",isWarning=True)
             self.logger.exception('issue with notification')
             sys.exit(1)
             
