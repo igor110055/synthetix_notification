@@ -54,7 +54,7 @@ class Notify():
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [outputDict["currency"]],
                                          'amount': ["{0:,.2f}".format(outputDict["amount"])],
-                                         'usdValue':[usdValue],
+                                         'usdValue':["{0:,.2f}".format(usdValue)],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
             df[self.socketDict["eventId"]] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
@@ -76,7 +76,7 @@ class Notify():
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [shortCurrency],
                                          'amount': ["{0:,.2f}".format(outputDict["amount"])],
-                                         'usdValue':[usdValue],
+                                         'usdValue':["{0:,.2f}".format(usdValue)],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
             df[self.socketDict["eventId"]] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
@@ -98,7 +98,7 @@ class Notify():
                                          'sent on': [self.socketDict["network"]],
                                          'ccy': [shortCurrency],
                                          'amount': ["{0:,.2f}".format(outputDict["amountRepaid"])],
-                                         'usdValue':[usdValue],
+                                         'usdValue':["{0:,.2f}".format(usdValue)],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
             df[self.socketDict["eventId"]] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
