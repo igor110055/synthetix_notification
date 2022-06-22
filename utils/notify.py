@@ -46,7 +46,7 @@ class Notify():
             sys.exit(1)
             
     def process_shorts_open(self):
-        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
+        etherscanLink = self .conf["etherscan"]["links"][self.socketDict["network"]]        
         for log in self.socketDict["output"]:
             outputDict, undecodedDict = self.process_log(log)
             usdValue = self.synthPriceDict.get(outputDict["currency"],0)*outputDict["amount"]
@@ -67,14 +67,18 @@ class Notify():
             self.print_embed(hook=hook, df=df)
 
     def process_shorts_increase(self):
-        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
+        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]
         for log in self.socketDict["output"]:
-            outputDict, undecodedDict = self.process_log(log)
-            shortCurrency = self.get_short_currency(undecodedDict["id"],self.socketDict["network"])
-            usdValue = self.synthPriceDict.get(shortCurrency,0)*outputDict["amount"]
+            outputDict, undecodedDict = self.process_log(log)            
+            userAddress = '0x'+log["topics"][1][-40:]
+            currencyKey = self.get_loan_ccy(loanId=undecodedDict["id"],
+                                            userAddress=userAddress,
+                                            network=self.socketDict["network"],
+                                            contractName=self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["contractName"])
+            usdValue = self.synthPriceDict.get(currencyKey,0)*outputDict["amount"]
             df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
                                          'sent on': [self.socketDict["network"]],
-                                         'ccy': [shortCurrency],
+                                         'ccy': [currencyKey],
                                          'amount': ["{0:,.2f}".format(outputDict["amount"])],
                                          'usdValue':["{0:,.2f}".format(usdValue)],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
@@ -91,12 +95,162 @@ class Notify():
     def process_shorts_decrease(self):
         etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]
         for log in self.socketDict["output"]:
-            outputDict, undecodedDict = self.process_log(log)
-            shortCurrency = self.get_short_currency(undecodedDict["id"],self.socketDict["network"])
-            usdValue = self.synthPriceDict.get(shortCurrency,0)*outputDict["amountRepaid"]
+            outputDict, undecodedDict = self.process_log(log)            
+            userAddress = '0x'+log["topics"][1][-40:]
+            currencyKey = self.get_loan_ccy(loanId=undecodedDict["id"],
+                                            userAddress=userAddress,
+                                            network=self.socketDict["network"],
+                                            contractName=self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["contractName"])
+            usdValue = self.synthPriceDict.get(currencyKey,0)*outputDict["amountRepaid"]
             df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
                                          'sent on': [self.socketDict["network"]],
-                                         'ccy': [shortCurrency],
+                                         'ccy': [currencyKey],
+                                         'amount': ["{0:,.2f}".format(outputDict["amountRepaid"])],
+                                         'usdValue':["{0:,.2f}".format(usdValue)],
+                                         'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
+            df = df[df.columns[::-1]]
+            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+            if usdValue > 10000:
+                hook = hook["big"]    
+            else:
+                hook = hook["small"]
+            self.print_embed(hook=hook, df=df)
+
+    def process_eth_loan_open(self):
+        etherscanLink = self .conf["etherscan"]["links"][self.socketDict["network"]]        
+        for log in self.socketDict["output"]:
+            outputDict, undecodedDict = self.process_log(log)
+            usdValue = self.synthPriceDict.get(outputDict["currency"],0)*outputDict["amount"]
+            df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
+                                         'sent on': [self.socketDict["network"]],
+                                         'ccy': [outputDict["currency"]],
+                                         'amount': ["{0:,.2f}".format(outputDict["amount"])],
+                                         'usdValue':["{0:,.2f}".format(usdValue)],
+                                         'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
+            df = df[df.columns[::-1]]
+            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+            if usdValue > 10000:
+                hook = hook["big"]    
+            else:
+                hook = hook["small"]
+            self.print_embed(hook=hook, df=df)
+
+    def process_eth_loan_increase(self):
+        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]
+        for log in self.socketDict["output"]:
+            outputDict, undecodedDict = self.process_log(log)            
+            userAddress = '0x'+log["topics"][1][-40:]
+            currencyKey = self.get_loan_ccy(loanId=undecodedDict["id"],
+                                            userAddress=userAddress,
+                                            network=self.socketDict["network"],
+                                            contractName=self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["contractName"])
+            usdValue = self.synthPriceDict.get(currencyKey,0)*outputDict["amount"]
+            df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
+                                         'sent on': [self.socketDict["network"]],
+                                         'ccy': [currencyKey],
+                                         'amount': ["{0:,.2f}".format(outputDict["amount"])],
+                                         'usdValue':["{0:,.2f}".format(usdValue)],
+                                         'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
+            df = df[df.columns[::-1]]
+            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+            if usdValue > 10000:
+                hook = hook["big"]    
+            else:
+                hook = hook["small"]
+            self.print_embed(hook=hook, df=df)
+
+    def process_eth_loan_decrease(self):
+        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]
+        for log in self.socketDict["output"]:
+            outputDict, undecodedDict = self.process_log(log)            
+            userAddress = '0x'+log["topics"][1][-40:]
+            currencyKey = self.get_loan_ccy(loanId=undecodedDict["id"],
+                                            userAddress=userAddress,
+                                            network=self.socketDict["network"],
+                                            contractName=self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["contractName"])
+            usdValue = self.synthPriceDict.get(currencyKey,0)*outputDict["amountRepaid"]
+            df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
+                                         'sent on': [self.socketDict["network"]],
+                                         'ccy': [currencyKey],
+                                         'amount': ["{0:,.2f}".format(outputDict["amountRepaid"])],
+                                         'usdValue':["{0:,.2f}".format(usdValue)],
+                                         'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
+            df = df[df.columns[::-1]]
+            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+            if usdValue > 10000:
+                hook = hook["big"]    
+            else:
+                hook = hook["small"]
+            self.print_embed(hook=hook, df=df)
+
+    def process_erc_loan_open(self):
+        etherscanLink = self .conf["etherscan"]["links"][self.socketDict["network"]]        
+        for log in self.socketDict["output"]:
+            outputDict, undecodedDict = self.process_log(log)
+            usdValue = self.synthPriceDict.get(outputDict["currency"],0)*outputDict["amount"]
+            df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
+                                         'sent on': [self.socketDict["network"]],
+                                         'ccy': [outputDict["currency"]],
+                                         'amount': ["{0:,.2f}".format(outputDict["amount"])],
+                                         'usdValue':["{0:,.2f}".format(usdValue)],
+                                         'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
+            df = df[df.columns[::-1]]
+            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+            if usdValue > 10000:
+                hook = hook["big"]    
+            else:
+                hook = hook["small"]
+            self.print_embed(hook=hook, df=df)
+
+    def process_erc_loan_increase(self):
+        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]
+        for log in self.socketDict["output"]:
+            outputDict, undecodedDict = self.process_log(log)            
+            userAddress = '0x'+log["topics"][1][-40:]
+            currencyKey = self.get_loan_ccy(loanId=undecodedDict["id"],
+                                            userAddress=userAddress,
+                                            network=self.socketDict["network"],
+                                            contractName=self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["contractName"])
+            usdValue = self.synthPriceDict.get(currencyKey,0)*outputDict["amount"]
+            df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
+                                         'sent on': [self.socketDict["network"]],
+                                         'ccy': [currencyKey],
+                                         'amount': ["{0:,.2f}".format(outputDict["amount"])],
+                                         'usdValue':["{0:,.2f}".format(usdValue)],
+                                         'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T
+            df[self.socketDict["eventId"]] = df.index
+            df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
+            df = df[df.columns[::-1]]
+            hook = self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["discordHook"]
+            if usdValue > 10000:
+                hook = hook["big"]    
+            else:
+                hook = hook["small"]
+            self.print_embed(hook=hook, df=df)
+
+    def process_erc_loan_decrease(self):
+        etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]
+        for log in self.socketDict["output"]:
+            outputDict, undecodedDict = self.process_log(log)            
+            userAddress = '0x'+log["topics"][1][-40:]
+            currencyKey = self.get_loan_ccy(loanId=undecodedDict["id"],
+                                            userAddress=userAddress,
+                                            network=self.socketDict["network"],
+                                            contractName=self.socketConf[self.socketDict["network"]][self.socketDict["eventId"]]["contractName"])
+            usdValue = self.synthPriceDict.get(currencyKey,0)*outputDict["amountRepaid"]
+            df = pd.DataFrame.from_dict({'account': [outputDict["account"][:8]],
+                                         'sent on': [self.socketDict["network"]],
+                                         'ccy': [currencyKey],
                                          'amount': ["{0:,.2f}".format(outputDict["amountRepaid"])],
                                          'usdValue':["{0:,.2f}".format(usdValue)],
                                          'tx': [f'''[{log["transactionHash"][:8]}]({etherscanLink.format(log["transactionHash"])})''']}).T

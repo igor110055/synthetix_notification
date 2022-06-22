@@ -34,7 +34,6 @@ class Websocket():
             #On Inordinary exception regenerate the socket
             except:    
                 self.socketList[idx]["heal"] = True
-                self.logger.exception('issue with socket disconnection')
 
     #Regenerate new tasks automatically every n minutes
     async def socket_generator(self):

@@ -38,3 +38,7 @@ class Recurrent():
         except:
             self.logger.exception('issue with snx synth price fetch')
             sys.exit(1)
+
+    async def restart_recurrent(self):
+        await asyncio.sleep(60*60*3)
+        sys.exit(6)

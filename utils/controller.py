@@ -42,10 +42,10 @@ class Controller(Websocket,SnxContracts,Notify,Recurrent,Loans):
         master.append(self.heal_check())
         master.append(self.socket_generator())
         
-        #add recurrent tasks / fetching snx contracts / fetching synth prices
-        master.append(self.update_snx_contracts_async())
+        #add recurrent tasks / fetching snx contracts / fetching synth prices / restarting the bot
         master.append(self.get_synth_prices_recurrent())
-                
+        master.append(self.restart_recurrent())
+
         #add notification bot
         master.append(self.process_notifications())
                 

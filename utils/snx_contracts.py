@@ -1,11 +1,7 @@
-import sys
 import json
 import pandas as pd
 import requests
 from utils.utility import get_abi
-import asyncio
-import nest_asyncio
-nest_asyncio.apply()
 
 class SnxContracts():
 
@@ -45,19 +41,3 @@ class SnxContracts():
     def get_address(self,contractName,network):
         contractsDF = self.snxContractsDict[network].query("index==@contractName and status=='current'")
         return contractsDF["address"].values[0]
-    
-    async def update_snx_contracts_async(self):
-        try:
-            while True:
-                await asyncio.sleep(60*60*6)
-                self.get_contracts_df()
-                #On cancellation, cancel subscription
-        except KeyboardInterrupt:
-            sys.exit(0)
-            
-        except asyncio.CancelledError:
-            self.log(message="snx contract update killed",isWarning=False)
-            sys.exit(0)
-        except:
-            self.logger.exception('issue with snx contract update')
-            sys.exit(1)        
