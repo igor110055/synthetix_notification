@@ -37,5 +37,5 @@ class Prices:
     def get_atomic_link_price(self,synth,blockNumber):
         if synth == 'sUSD':
             return 1, 1
-        atomicRate, systemRate,sourceRate,destinationRate = self.exchangerRatesContract.functions.effectiveAtomicValueAndRates('0x'+synth.encode('utf-8').hex(),1e18,'0x73555344').call(block_identifer=blockNumber)
+        atomicRate, systemRate,sourceRate,destinationRate = self.exchangerRatesContract.functions.effectiveAtomicValueAndRates('0x'+synth.encode('utf-8').hex(),int(1e18),'0x73555344').call(block_identifier=blockNumber)
         return atomicRate/1e18 , systemRate/1e18
