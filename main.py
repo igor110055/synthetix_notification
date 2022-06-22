@@ -4,7 +4,7 @@ from utils.controller import Controller
 import argparse
 conf       = parse_config(r"config/conf.yaml")
 socketConf = parse_config(r"config/socketConf.yaml")
-conf       = conf["stage"]
+conf       = conf
 #%%Arg Parse
 if __name__ == '__main__':
 
