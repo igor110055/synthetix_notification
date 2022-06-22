@@ -332,10 +332,10 @@ class Notify():
                                          'user': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})'''],
                                          'atomicSourceRate':"{0:,.4f}".format(atomicSourceRate),
                                          'binanceSourceRate':"{0:,.4f}".format(binanceSourceRate),
-                                         'sourceDelta': int(atomicSourceRate/binanceSourceRate-1)*1e4,
+                                         'sourceDelta': int((atomicSourceRate/binanceSourceRate-1)*1e4),
                                          'atomicDestinationRate':"{0:,.4f}".format(atomicDestinationRate),
                                          'binanceDestinationRate':"{0:,.4f}".format(binanceDestinationRate),
-                                         'destinationDelta': int(atomicDestinationRate/binanceDestinationRate-1)*1e4,
+                                         'destinationDelta': int((atomicDestinationRate/binanceDestinationRate-1)*1e4),
                                          'chainlinkSourceRate':"{0:,.4f}".format(chainlinkSourceRate),
                                          'chainlinkDestinationRate':"{0:,.4f}".format(chainlinkDestinationRate)}).T
             df[self.socketDict["eventId"]] = df.index
