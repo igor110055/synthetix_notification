@@ -3,6 +3,7 @@ from utils.snx_contracts import SnxContracts
 from utils.recurrent_tasks import Recurrent
 from utils.notify import Notify
 from utils.loans import Loans
+from utils.prices import Prices
 from web3.providers.base import JSONBaseProvider
 from utils.utility import get_abi
 from eth_event import get_topic_map
@@ -13,7 +14,7 @@ import asyncio
 import nest_asyncio
 nest_asyncio.apply()
 
-class Controller(Websocket,SnxContracts,Notify,Recurrent,Loans):
+class Controller(Websocket,SnxContracts,Notify,Recurrent,Loans,Prices):
 
     def __init__(self,conf,socketConf):
         
@@ -24,6 +25,7 @@ class Controller(Websocket,SnxContracts,Notify,Recurrent,Loans):
         Notify.__init__(self,conf)
         Recurrent.__init__(self,conf)
         Loans.__init__(self,conf)
+        Prices.__init__(self,conf)
         
     def trigger_controller(self):
                 
