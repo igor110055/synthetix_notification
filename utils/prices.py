@@ -21,7 +21,9 @@ class Prices:
         if not symbol in self.markets:
             return -1
         try:
-            return self.exchange.fetch_ticker(symbol)["close"]
+            symbolPrice = self.exchange.fetch_ticker(symbol)["close"]
+            usdtPrice   = self.exchange.fetch_ticker('BUSD/USDT')["close"]
+            return symbolPrice / usdtPrice
         except ccxt.RequestTimeout:
             return -1
         except ccxt.DDoSProtection:
