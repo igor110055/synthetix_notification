@@ -3,7 +3,7 @@ from eth_event import decode_log
 import logging, watchtower
 from logging.handlers import TimedRotatingFileHandler
 import boto3
-from utils.utility import process_data
+from utils.utility import process_data, get_w3
 import sys
 import asyncio
 import pandas as pd
@@ -345,9 +345,10 @@ class Notify():
                 afterFeeRate  = outputDict["toAmount"] / outputDict["fromAmount"]
                 delta         = int((afterFeeRate/binanceRate-1)*1e4)
                                            
+            fromAddress = self.get_sender(log["transactionHash"],self.socketDict["network"])
             df = pd.DataFrame.from_dict({'from': [str("{0:,.2f}".format(outputDict["fromAmount"])) + " " + outputDict["fromCurrencyKey"]],
                                          'to': [str("{0:,.2f}".format(outputDict["toAmount"])) +" " + outputDict["toCurrencyKey"]],
-                                         'user': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})'''],
+                                         'user': [f'''[{fromAddress[:8]}]({etherscanLink.format(log["transactionHash"])})'''],
                                          'quotation':quotation,
                                          'afterFeeRate':"{0:,.4f}".format(afterFeeRate),
                                          'binanceRate':"{0:,.4f}".format(binanceRate),
@@ -393,6 +394,10 @@ class Notify():
         decoded   = df["data"]
         undecoded = df["value"]
         return decoded.to_dict(), undecoded.to_dict()
+    
+    def get_sender(self,txHash,network):
+        w3 = get_w3(self.conf,network)
+        return w3.eth.getTransaction(txHash)["from"]        
     
     def print_embed(self,hook,df,title=None):
         
