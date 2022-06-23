@@ -342,8 +342,8 @@ class Notify():
                 atomicRate    = atomicRate
                 chainlinkRate = chainlinkRate
                 binanceRate   = binanceSourceRate  / binanceDestinationRate
-                delta         = int((afterFeeRate/binanceRate-1)*1e4)
                 afterFeeRate  = outputDict["toAmount"] / outputDict["fromAmount"]
+                delta         = int((afterFeeRate/binanceRate-1)*1e4)
                                            
             df = pd.DataFrame.from_dict({'from': [str("{0:,.2f}".format(outputDict["fromAmount"])) + " " + outputDict["fromCurrencyKey"]],
                                          'to': [str("{0:,.2f}".format(outputDict["toAmount"])) +" " + outputDict["toCurrencyKey"]],
