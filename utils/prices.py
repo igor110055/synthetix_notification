@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import ccxt
+from web3 import Web3
 import sys
 from utils.utility import get_w3
 
@@ -34,8 +35,10 @@ class Prices:
             self.logger.exception('issue seen with controller restarting bot')
             sys.exit(7)
 
-    def get_atomic_link_price(self,synth,blockNumber):
-        if synth == 'sUSD':
-            return 1, 1
-        atomicRate, systemRate,sourceRate,destinationRate = self.exchangerRatesContract.functions.effectiveAtomicValueAndRates('0x'+synth.encode('utf-8').hex(),int(1e18),'0x73555344').call(block_identifier=blockNumber)
+    def get_atomic_link_price(self,fromCurrencyKey,toCurrencyKey,blockNumber):
+        fromHex   = Web3.toHex(text=fromCurrencyKey)
+        toHex     = Web3.toHex(text=toCurrencyKey)
+        atomicRate, systemRate,systemSourceRate,systemDestinationRate = self.exchangerRatesContract.functions.effectiveAtomicValueAndRates(fromHex,
+                                                                                                                                           int(1e18),
+                                                                                                                                           toHex).call(block_identifier=blockNumber)
         return atomicRate/1e18 , systemRate/1e18

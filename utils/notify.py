@@ -319,25 +319,45 @@ class Notify():
             self.print_embed(hook=hook, df=df)
 
     def process_atomic_exchange(self):
+
         etherscanLink = self.conf["etherscan"]["links"][self.socketDict["network"]]        
+
         for log in self.socketDict["output"]:
             outputDict, undecodedDict = self.process_log(log)            
+
             binanceSourceRate      = self.get_binance_price(outputDict["fromCurrencyKey"][1:])
             binanceDestinationRate = self.get_binance_price(outputDict["toCurrencyKey"][1:])
-            atomicSourceRate, chainlinkSourceRate           = self.get_atomic_link_price(synth=outputDict["fromCurrencyKey"],blockNumber=int(log["blockNumber"],16))
-            atomicDestinationRate, chainlinkDestinationRate = self.get_atomic_link_price(synth=outputDict["toCurrencyKey"],blockNumber=int(log["blockNumber"],16))
-            
+            atomicRate, chainlinkRate = self.get_atomic_link_price(fromCurrencyKey=outputDict["fromCurrencyKey"],
+                                                                   toCurrencyKey=outputDict["toCurrencyKey"],
+                                                                   blockNumber=int(log["blockNumber"],16))            
+            if outputDict["fromCurrencyKey"] == 'sUSD':
+                quotation     = outputDict["toCurrencyKey"] + "/" + outputDict["fromCurrencyKey"]
+                atomicRate    = 1 / atomicRate
+                chainlinkRate = 1 / chainlinkRate
+                binanceRate   = binanceDestinationRate / binanceSourceRate 
+                delta         = int((binanceRate/atomicRate-1)*1e4)
+            elif outputDict["toCurrencyKey"] == 'sUSD':
+                quotation     = outputDict["fromCurrencyKey"] + "/" + outputDict["toCurrencyKey"]
+                atomicRate    = atomicRate
+                chainlinkRate = chainlinkRate
+                binanceRate   = binanceSourceRate  / binanceDestinationRate
+                delta         = int((atomicRate/binanceRate-1)*1e4)
+            else:
+                quotation     = outputDict["fromCurrencyKey"] + "/" + outputDict["toCurrencyKey"]
+                atomicRate    = atomicRate
+                chainlinkRate = chainlinkRate
+                binanceRate   = binanceSourceRate  / binanceDestinationRate
+                delta         = int((atomicRate/binanceRate-1)*1e4)
+                                           
             df = pd.DataFrame.from_dict({'from': [str("{0:,.2f}".format(outputDict["fromAmount"])) + " " + outputDict["fromCurrencyKey"]],
                                          'to': [str("{0:,.2f}".format(outputDict["toAmount"])) +" " + outputDict["toCurrencyKey"]],
                                          'user': [f'''[{outputDict["account"][:8]}]({etherscanLink.format(log["transactionHash"])})'''],
-                                         'atomicSourceRate':"{0:,.4f}".format(atomicSourceRate),
-                                         'binanceSourceRate':"{0:,.4f}".format(binanceSourceRate),
-                                         'sourceDelta': int((atomicSourceRate/binanceSourceRate-1)*1e4),
-                                         'atomicDestinationRate':"{0:,.4f}".format(atomicDestinationRate),
-                                         'binanceDestinationRate':"{0:,.4f}".format(binanceDestinationRate),
-                                         'destinationDelta': int((atomicDestinationRate/binanceDestinationRate-1)*1e4),
-                                         'chainlinkSourceRate':"{0:,.4f}".format(chainlinkSourceRate),
-                                         'chainlinkDestinationRate':"{0:,.4f}".format(chainlinkDestinationRate)}).T
+                                         'quotation':quotation,
+                                         'atomicRate':"{0:,.4f}".format(atomicRate),
+                                         'binanceRate':"{0:,.4f}".format(binanceRate),
+                                         'delta': delta,
+                                         'chainlinkRate':chainlinkRate}).T
+
             df[self.socketDict["eventId"]] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
             df = df[df.columns[::-1]]
