@@ -356,7 +356,7 @@ class Notify():
                                          'atomicRate':"{0:,.4f}".format(atomicRate),
                                          'binanceRate':"{0:,.4f}".format(binanceRate),
                                          'delta': delta,
-                                         'chainlinkRate':chainlinkRate}).T
+                                         'chainlinkRate':"{0:,.4f}".format(chainlinkRate)}).T
 
             df[self.socketDict["eventId"]] = df.index
             df.columns=[f'''{int(log["blockNumber"],16)}''',self.socketDict["eventId"]]
